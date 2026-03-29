@@ -1,181 +1,133 @@
-import { useState } from 'react';
-import { Menu, X, CircleUser as UserCircle, LogOut, LayoutDashboard } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Menu, X } from 'lucide-react';
+import type { Language } from '../locales/translations';
 
 export default function Header() {
+  const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, profile, signOut } = useAuth();
+  const location = useLocation();
 
-  const navigation = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Reports', href: '#reports' },
-    { name: 'News', href: '#news' },
-    { name: 'Events', href: '#events' },
-    { name: 'Gallery', href: '#gallery' },
+  const navLinks = [
+    { name: t('nav.about'), path: '/about' },
+    { name: t('nav.news'), path: '/#feed', isHash: true },
+    { name: t('nav.initiatives'), path: '/initiatives' },
+    { name: t('nav.impact'), path: '/impact' }
   ];
 
-  const handleSignOut = async () => {
-    await signOut();
-    setIsUserMenuOpen(false);
+  const handleLanguageSwitch = (lang: Language) => {
+    setLanguage(lang);
   };
 
   return (
-    <header className="bg-gray-900 text-white sticky top-0 z-50 shadow-lg">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-[#0a0a0a] border-b border-dark-border sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold">
-                <span className="text-red-600">BELAURI</span> FIRST
-              </h1>
+          
+          {/* Logo Section */}
+          <Link to="/" className="flex items-center gap-4 flex-shrink-0 group">
+            <div className="flex items-baseline gap-2">
+              <span className={`font-black tracking-tighter uppercase text-primary-600 ${language === 'np' ? 'text-2xl font-devanagari tracking-normal leading-none mb-1' : 'text-xl'}`}>
+                {t('header.title')}
+              </span>
+              <span className={`hidden sm:inline text-slate-400 font-medium ${language === 'np' ? 'text-sm font-devanagari relative top-[-2px]' : 'text-xs'}`}>
+                {t('header.subtitle')}
+              </span>
             </div>
-            <div className="hidden md:block ml-10">
-              <div className="flex items-baseline space-x-4">
-                {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-red-600 hover:text-white transition-colors"
-                  >
-                    {item.name}
-                  </a>
-                ))}
-              </div>
+          </Link>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              link.isHash ? (
+                <a
+                  key={link.path}
+                  href={link.path}
+                  className="text-sm tracking-wide transition-colors text-slate-400 hover:text-white"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm tracking-wide transition-colors ${
+                    location.pathname === link.path ? 'text-white font-semibold' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              )
+            ))}
+            
+            {/* Language Switcher */}
+            <div className="flex bg-dark-surface border border-dark-border rounded items-center p-0.5 ml-4">
+              <button
+                onClick={() => handleLanguageSwitch('en')}
+                className={`px-3 py-1 text-xs font-bold transition-all ${
+                  language === 'en' ? 'bg-white text-black' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {t('lang.eng')}
+              </button>
+              <button
+                onClick={() => handleLanguageSwitch('np')}
+                className={`px-3 py-1 text-xs font-bold transition-all font-devanagari ${
+                  language === 'np' ? 'bg-white text-black' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {t('lang.np')}
+              </button>
             </div>
-          </div>
+          </nav>
 
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-md bg-gray-800 hover:bg-gray-700 transition-colors"
-                >
-                  <UserCircle className="w-5 h-5" />
-                  <span className="text-sm">{profile?.full_name}</span>
-                </button>
-
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
-                    <a
-                      href="#dashboard"
-                      className="flex items-center px-4 py-2 text-sm hover:bg-gray-700"
-                    >
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      Dashboard
-                    </a>
-                    {profile?.is_admin && (
-                      <a
-                        href="#admin"
-                        className="flex items-center px-4 py-2 text-sm hover:bg-gray-700 text-red-400"
-                      >
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Admin Panel
-                      </a>
-                    )}
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-700 text-left"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <a
-                  href="#login"
-                  className="px-4 py-2 text-sm font-medium hover:text-red-400 transition-colors"
-                >
-                  Sign In
-                </a>
-                <a
-                  href="#signup"
-                  className="px-4 py-2 text-sm font-medium bg-red-600 rounded-md hover:bg-red-700 transition-colors"
-                >
-                  Join Us
-                </a>
-              </>
-            )}
-          </div>
-
-          <div className="md:hidden">
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center gap-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-md hover:bg-gray-800 transition-colors"
+              className="p-2 text-slate-400 hover:text-white transition-colors"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
+      </div>
 
-        {isMenuOpen && (
-          <div className="md:hidden pb-3">
-            <div className="flex flex-col space-y-1">
-              {navigation.map((item) => (
+      {/* Mobile Nav */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-dark-border bg-dark-surface absolute w-full shadow-2xl">
+          <div className="px-4 py-4 space-y-4 font-medium">
+            {navLinks.map((link) => (
+              link.isHash ? (
                 <a
-                  key={item.name}
-                  href={item.href}
-                  className="px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 hover:text-white transition-colors"
+                  key={link.path}
+                  href={link.path}
                   onClick={() => setIsMenuOpen(false)}
+                  className="block px-2 py-1 text-base text-slate-300 hover:text-white"
                 >
-                  {item.name}
+                  {link.name}
                 </a>
-              ))}
-              {user ? (
-                <>
-                  <a
-                    href="#dashboard"
-                    className="px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 hover:text-white transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Dashboard
-                  </a>
-                  {profile?.is_admin && (
-                    <a
-                      href="#admin"
-                      className="px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 hover:text-white transition-colors text-red-400"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Admin Panel
-                    </a>
-                  )}
-                  <button
-                    onClick={() => {
-                      handleSignOut();
-                      setIsMenuOpen(false);
-                    }}
-                    className="px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 hover:text-white transition-colors text-left"
-                  >
-                    Sign Out
-                  </button>
-                </>
               ) : (
-                <>
-                  <a
-                    href="#login"
-                    className="px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 hover:text-white transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign In
-                  </a>
-                  <a
-                    href="#signup"
-                    className="px-3 py-2 rounded-md text-base font-medium bg-red-600 hover:bg-red-700 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Join Us
-                  </a>
-                </>
-              )}
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-2 py-1 text-base ${
+                    location.pathname === link.path ? 'text-primary-500' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              )
+            ))}
+            <div className="flex pt-4 border-t border-dark-border gap-2">
+              <button onClick={() => { handleLanguageSwitch('en'); setIsMenuOpen(false); }} className={`px-4 py-2 border rounded text-xs font-bold flex-1 ${language === 'en' ? 'bg-white text-black' : 'text-white border-dark-border'}`}>{t('lang.eng')}</button>
+              <button onClick={() => { handleLanguageSwitch('np'); setIsMenuOpen(false); }} className={`px-4 py-2 border rounded text-xs font-bold flex-1 font-devanagari ${language === 'np' ? 'bg-white text-black' : 'text-white border-dark-border'}`}>{t('lang.np')}</button>
             </div>
           </div>
-        )}
-      </nav>
+        </div>
+      )}
     </header>
   );
 }

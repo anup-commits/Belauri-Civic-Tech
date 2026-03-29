@@ -1,107 +1,31 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { LanguageProvider } from './contexts/LanguageContext';
+
 import Layout from './components/Layout';
-import Hero from './components/home/Hero';
-import Stats from './components/home/Stats';
-import About from './components/home/About';
-import CallToAction from './components/home/CallToAction';
-import ReportForm from './components/reports/ReportForm';
-import ReportsList from './components/reports/ReportsList';
-import NewsList from './components/news/NewsList';
-import EventsList from './components/events/EventsList';
-import GalleryGrid from './components/gallery/GalleryGrid';
-import UserDashboard from './components/dashboard/UserDashboard';
-import AdminPanel from './components/admin/AdminPanel';
-import LoginForm from './components/auth/LoginForm';
-import SignupForm from './components/auth/SignupForm';
+import FloatingSubmitForm from './components/FloatingSubmitForm';
 
-function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'admin'>('home');
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
+import Home from './pages/Home';
+import About from './pages/About';
+import Initiatives from './pages/Initiatives';
+import AdminPanel from './pages/AdminPanel';
+import Impact from './pages/Impact';
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-
-      if (hash === '#dashboard') {
-        setCurrentView('dashboard');
-        window.scrollTo(0, 0);
-      } else if (hash === '#admin') {
-        setCurrentView('admin');
-        window.scrollTo(0, 0);
-      } else if (hash === '#login') {
-        setShowLoginModal(true);
-      } else if (hash === '#signup') {
-        setShowSignupModal(true);
-      } else {
-        setCurrentView('home');
-        if (hash && hash !== '#home') {
-          setTimeout(() => {
-            const element = document.querySelector(hash);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth' });
-            }
-          }, 100);
-        }
-      }
-    };
-
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const handleCloseLogin = () => {
-    setShowLoginModal(false);
-    window.history.pushState('', document.title, window.location.pathname);
-  };
-
-  const handleCloseSignup = () => {
-    setShowSignupModal(false);
-    window.history.pushState('', document.title, window.location.pathname);
-  };
-
+export default function App() {
   return (
-    <>
-      <Layout>
-        {currentView === 'home' && (
-          <>
-            <Hero />
-            <Stats />
-            <About />
-            <ReportForm />
-            <ReportsList />
-            <NewsList />
-            <EventsList />
-            <GalleryGrid />
-            <CallToAction />
-          </>
-        )}
-        {currentView === 'dashboard' && <UserDashboard />}
-        {currentView === 'admin' && <AdminPanel />}
-      </Layout>
-
-      {showLoginModal && (
-        <LoginForm
-          onClose={handleCloseLogin}
-          onSwitchToSignup={() => {
-            setShowLoginModal(false);
-            setShowSignupModal(true);
-          }}
-        />
-      )}
-
-      {showSignupModal && (
-        <SignupForm
-          onClose={handleCloseSignup}
-          onSwitchToLogin={() => {
-            setShowSignupModal(false);
-            setShowLoginModal(true);
-          }}
-        />
-      )}
-    </>
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/secret-admin-belauri" element={<AdminPanel />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="about" element={<About />} />
+            <Route path="initiatives" element={<Initiatives />} />
+            <Route path="impact" element={<Impact />} />
+          </Route>
+        </Routes>
+        <FloatingSubmitForm />
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }
-
-export default App;
