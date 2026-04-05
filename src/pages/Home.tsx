@@ -1,108 +1,87 @@
-import React, { useEffect, useState } from 'react';
-import { supabase, type Post } from '../lib/supabase';
-import { useLanguage } from '../contexts/LanguageContext';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import Hero from '../components/Hero';
 import PostCard from '../components/PostCard';
+import IssuesMap from '../components/map/IssuesMap';
 import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const { t } = useLanguage();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPosts();
-
-    // Set up realtime subscription
-    const channel = supabase
-      .channel('public:posts')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'posts' }, 
-        (payload) => {
-          // Handle inserts/updates/deletes for Realtime feed
-          const newPost = payload.new as Post;
-          const oldPost = payload.old as Post;
-
-          if (payload.eventType === 'INSERT' && newPost.status === 'approved') {
-            setPosts((prev) => [newPost, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            if (newPost.status === 'approved') {
-              setPosts((prev) => {
-                const exists = prev.find(p => p.id === newPost.id);
-                if (exists) {
-                  return prev.map(p => p.id === newPost.id ? newPost : p);
-                }
-                return [newPost, ...prev];
-              });
-            } else {
-              // If status changed to rejected/pending, remove it
-              setPosts((prev) => prev.filter(p => p.id !== newPost.id));
-            }
-          } else if (payload.eventType === 'DELETE') {
-            setPosts((prev) => prev.filter(p => p.id !== oldPost.id));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    fetchReports();
   }, []);
 
-  const fetchPosts = async () => {
+  const fetchReports = async () => {
     try {
-      setLoading(true);
       const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('status', 'approved')
+        .from('reports')
+        .select(`*, assigned_to:profiles!assigned_to(full_name, role)`)
+        .neq('status', 'rejected') // optionally only fetch approved/resolved/in_progress
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPosts(data || []);
+      setReports(data || []);
     } catch (err) {
-      console.error('Error fetching posts:', err);
+      console.error('Error fetching reports:', err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
+    <div className="bg-dark-bg min-h-screen">
       <Hero />
       
-      <div id="feed" className="bg-[#050505] py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12 border-b border-dark-border pb-4">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase">
-                {t('home.feed.title')}
-              </h2>
-              <p className="text-slate-500 text-sm mt-1">{t('home.feed.subtitle')}</p>
-            </div>
-            <a href="#feed" className="text-primary-500 font-bold text-sm tracking-widest uppercase hover:text-primary-400">
-              {t('home.feed.view_all')}
-            </a>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 animate-fade-in relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-dark-border pb-6">
+          <div className="max-w-3xl">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tight">
+              Community Map
+            </h2>
+            <p className="text-xl text-slate-400 font-medium">
+              Explore reported civic issues mapped across our neighborhoods. Transparent, real-time tracking for action.
+            </p>
           </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
-            </div>
-          ) : posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map(post => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 bg-dark-surface rounded-lg border border-dark-border">
-              <p className="text-slate-400 font-medium">{t('home.feed.empty')}</p>
-            </div>
-          )}
         </div>
-      </div>
-    </>
+
+        <div className="mb-24">
+           {!loading && <IssuesMap reports={reports} />}
+        </div>
+
+        <div className="flex justify-between items-end mb-12 border-b border-dark-border pb-6">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 uppercase tracking-tight">
+              Live Feed
+            </h2>
+            <p className="text-xl text-slate-400 font-medium">
+              Latest cases, discussions, and resolved issues in Belauri.
+            </p>
+          </div>
+        </div>
+        
+        {loading ? (
+          <div className="flex justify-center py-20">
+             <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
+             <span className="sr-only">Loading...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {reports.map((report) => (
+              <PostCard key={report.id} post={report} />
+            ))}
+          </div>
+        )}
+
+        {!loading && reports.length === 0 && (
+          <div className="text-center py-20 bg-dark-surface border border-dark-border rounded-xl">
+            <h3 className="text-2xl font-bold text-white mb-2">No active reports found</h3>
+            <p className="text-slate-500">The platform feed is currently empty. Be the first to report an issue!</p>
+          </div>
+        )}
+      </main>
+    </div>
   );
 }

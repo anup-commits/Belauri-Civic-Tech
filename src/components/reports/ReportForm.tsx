@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertCircle, Upload } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -99,7 +99,7 @@ export default function ReportForm() {
               <select
                 id="category"
                 value={category}
-                onChange={(e) => setCategory(e.target.value as any)}
+                onChange={(e) => setCategory(e.target.value as 'corruption' | 'infrastructure' | 'public_service' | 'other')}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
                 required
               >

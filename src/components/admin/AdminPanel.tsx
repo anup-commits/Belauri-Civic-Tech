@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Users, Calendar, Image, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, Users, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Database } from '../../lib/database.types';
@@ -135,7 +135,7 @@ export default function AdminPanel() {
               {['reports', 'posts', 'events', 'gallery', 'users'].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab as any)}
+                  onClick={() => setActiveTab(tab as 'reports' | 'posts' | 'events' | 'gallery' | 'users')}
                   className={`px-6 py-4 text-sm font-medium capitalize ${
                     activeTab === tab
                       ? 'border-b-2 border-red-600 text-red-600'

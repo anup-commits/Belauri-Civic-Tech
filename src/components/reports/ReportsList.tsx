@@ -98,7 +98,7 @@ export default function ReportsList() {
             </label>
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
+              onChange={(e) => setFilter(e.target.value as 'all' | 'corruption' | 'infrastructure' | 'public_service' | 'other')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
             >
               <option value="all">All Categories</option>
@@ -116,7 +116,7 @@ export default function ReportsList() {
               </label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'approved' | 'resolved')}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
               >
                 <option value="all">All Status</option>

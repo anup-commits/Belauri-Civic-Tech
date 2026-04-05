@@ -1,0 +1,60 @@
+﻿
+> vite-react-typescript-starter@0.0.0 lint
+> eslint .
+
+
+D:\project\src\components\FloatingSubmitForm.tsx
+  7:11  error  't' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\project\src\components\PostCard.tsx
+  3:10  error  'Post' is defined but never used          @typescript-eslint/no-unused-vars
+  7:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  8:11  error  't' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+D:\project\src\components\dashboard\ImpactCharts.tsx
+  6:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\project\src\components\dashboard\UserDashboard.tsx
+  18:6  warning  React Hook useEffect has a missing dependency: 'fetchMyReports'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\project\src\components\events\EventsList.tsx
+  17:6  warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\project\src\components\gallery\GalleryGrid.tsx
+  15:6  warning  React Hook useEffect has a missing dependency: 'fetchGallery'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\project\src\components\map\IssuesMap.tsx
+  11:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\project\src\components\news\NewsList.tsx
+  17:6  warning  React Hook useEffect has a missing dependency: 'fetchPosts'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\project\src\components\reports\ReportsList.tsx
+  18:6  warning  React Hook useEffect has a missing dependency: 'fetchReports'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\project\src\contexts\AuthContext.tsx
+  73:15  error  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\project\src\contexts\LanguageContext.tsx
+  28:6  warning  React Hook useEffect has a missing dependency: 'handleSetLanguage'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\project\src\pages\AdminPanel.tsx
+   3:23  error  'CheckCircle2' is defined but never used  @typescript-eslint/no-unused-vars
+   8:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   9:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\project\src\pages\Home.tsx
+  10:11  error  't' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  11:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\project\src\pages\Impact.tsx
+  8:11  error  't' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  9:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Ô£û 25 problems (19 errors, 6 warnings)
+

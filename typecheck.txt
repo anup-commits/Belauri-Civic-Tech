@@ -1,0 +1,19 @@
+﻿
+> vite-react-typescript-starter@0.0.0 typecheck
+> tsc --noEmit -p tsconfig.app.json
+
+src/App.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/admin/AdminPanel.tsx(2,27): error TS6133: 'Calendar' is declared but its value is never read.
+src/components/admin/AdminPanel.tsx(2,37): error TS6133: 'Image' is declared but its value is never read.
+src/components/Footer.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/Header.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/Hero.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/Layout.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/PostCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/reports/ReportForm.tsx(2,23): error TS6133: 'Upload' is declared but its value is never read.
+src/contexts/LanguageContext.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/pages/About.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/pages/AdminPanel.tsx(7,9): error TS6133: 't' is declared but its value is never read.
+src/pages/Home.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/pages/Impact.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/pages/Initiatives.tsx(1,1): error TS6133: 'React' is declared but its value is never read.

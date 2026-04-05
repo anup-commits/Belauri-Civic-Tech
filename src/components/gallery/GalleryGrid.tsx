@@ -51,7 +51,7 @@ export default function GalleryGrid() {
             {['all', 'image', 'video'].map((type) => (
               <button
                 key={type}
-                onClick={() => setFilter(type as any)}
+                onClick={() => setFilter(type as 'all' | 'image' | 'video')}
                 className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                   filter === type
                     ? 'bg-red-600 text-white'

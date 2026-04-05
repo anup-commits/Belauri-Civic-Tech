@@ -63,7 +63,7 @@ export default function NewsList() {
             {['all', 'news', 'blog', 'update', 'campaign'].map((cat) => (
               <button
                 key={cat}
-                onClick={() => setFilter(cat as any)}
+                onClick={() => setFilter(cat as 'all' | 'news' | 'blog' | 'update' | 'campaign')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   filter === cat
                     ? 'bg-red-600 text-white'
