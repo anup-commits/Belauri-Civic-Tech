@@ -21,7 +21,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-[#0a0a0a] border-b border-dark-border sticky top-0 z-40">
+    <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 supports-[backdrop-filter]:bg-dark-bg/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
@@ -62,11 +62,11 @@ export default function Header() {
             ))}
             
             {/* Language Switcher */}
-            <div className="flex bg-dark-surface border border-dark-border rounded items-center p-0.5 ml-4">
+            <div className="flex bg-white/5 rounded-lg p-1 ml-4 border border-white/10 items-center">
               <button
                 onClick={() => handleLanguageSwitch('en')}
-                className={`px-3 py-1 text-xs font-bold transition-all ${
-                  language === 'en' ? 'bg-white text-black' : 'text-slate-400 hover:text-white'
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  language === 'en' ? 'bg-white text-black shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {t('lang.eng')}
@@ -96,7 +96,7 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-dark-border bg-dark-surface absolute w-full shadow-2xl">
+        <div className="md:hidden border-t border-white/10 bg-dark-bg/95 backdrop-blur-xl absolute w-full shadow-2xl">
           <div className="px-4 py-4 space-y-4 font-medium">
             {navLinks.map((link) => (
               link.isHash ? (
