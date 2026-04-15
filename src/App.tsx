@@ -10,6 +10,7 @@ import About from './pages/About';
 import Initiatives from './pages/Initiatives';
 import AdminPanel from './pages/AdminPanel';
 import Impact from './pages/Impact';
+import AdminLogin from './pages/AdminLogin';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <LanguageProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/secret-admin-belauri" element={<AdminPanel />} />
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />

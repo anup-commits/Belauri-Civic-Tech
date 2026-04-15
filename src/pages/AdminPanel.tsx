@@ -1,38 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { ShieldAlert, AlertTriangle, Trash2, Loader2, Save, FileText } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { ShieldAlert, AlertTriangle, Trash2, Loader2, Save, FileText, LogOut } from 'lucide-react';
 
 export default function AdminPanel() {
-  const { profile } = useAuth();
+  const navigate = useNavigate();
   const [reports, setReports] = useState<any[]>([]);
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
   const [editingReport, setEditingReport] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({ status: '', resolution_note: '', assigned_to: '' });
 
-  // Strictly enforce admin/volunteer view only (handled by Route wrapper potentially, but double check here)
   useEffect(() => {
-    if (profile && (profile.role === 'admin' || profile.role === 'volunteer')) {
-      fetchData();
-    }
-  }, [profile]);
+    checkSessionAndFetchData();
+  }, []);
 
-  const fetchData = async () => {
+  const checkSessionAndFetchData = async () => {
     try {
       setLoading(true);
-      const [reportsData, volunteersData] = await Promise.all([
-        supabase.from('reports').select('*, assigned_to:profiles!assigned_to(id, full_name)').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('id, full_name, email, role').in('role', ['admin', 'volunteer'])
-      ]);
+      // Verify Session
+      const sessionRes = await fetch('/api/admin-session');
+      if (!sessionRes.ok) throw new Error('Unauthorized');
 
-      if (reportsData.error) throw reportsData.error;
-      setReports(reportsData.data || []);
-      setVolunteers(volunteersData.data || []);
+      // Fetch Data securely
+      const reportsRes = await fetch('/api/admin-reports');
+      if (!reportsRes.ok) throw new Error('Failed to fetch data');
+
+      const data = await reportsRes.json();
+      setReports(data.reports || []);
+      setVolunteers(data.volunteers || []);
     } catch (err: any) {
       console.error(err);
-      alert(err.message);
+      if (err.message === 'Unauthorized') {
+        setAuthError(true);
+        navigate('/admin-login');
+      } else {
+        alert(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -41,18 +46,25 @@ export default function AdminPanel() {
   const handleUpdate = async (id: string) => {
     try {
       const payload: any = {
+        id,
         status: editFormData.status,
         resolution_note: editFormData.resolution_note || null,
         assigned_to: editFormData.assigned_to || null,
-        updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from('reports').update(payload).eq('id', id);
+      const res = await fetch('/api/admin-reports', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-      if (error) throw error;
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Failed to update');
+      }
       
       setEditingReport(null);
-      fetchData();
+      checkSessionAndFetchData();
     } catch (err: any) {
       alert('Error updating: ' + err.message);
     }
@@ -61,22 +73,32 @@ export default function AdminPanel() {
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this case completely?")) return;
     try {
-      const { error } = await supabase.from('reports').delete().eq('id', id);
-      if (error) throw error;
+      const res = await fetch('/api/admin-reports', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+
+      if (!res.ok) {
+         const d = await res.json();
+         throw new Error(d.error || 'Failed to delete');
+      }
+      
       setReports(prev => prev.filter(p => p.id !== id));
     } catch (err: any) {
       alert('Error deleting: ' + err.message);
     }
   };
 
-  if (!profile || (profile.role !== 'admin' && profile.role !== 'volunteer')) {
+  const handleLogout = async () => {
+    await fetch('/api/admin-logout', { method: 'POST' });
+    navigate('/admin-login');
+  };
+
+  if (authError || (loading && !reports.length)) {
     return (
       <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4">
-        <div className="glass-card p-12 text-center max-w-md">
-          <ShieldAlert className="w-16 h-16 text-primary-500 mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-white mb-2 uppercase tracking-wide">Access Restricted</h1>
-          <p className="text-slate-400 font-medium">You do not have the required permissions. Please login with an authorized Volunteer or Admin account.</p>
-        </div>
+        <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
       </div>
     );
   }
@@ -91,11 +113,16 @@ export default function AdminPanel() {
             </div>
             <div>
                <h1 className="text-3xl font-black text-white uppercase tracking-tight">Mission Control</h1>
-               <p className="text-sm text-slate-400 font-mono">Role: {profile.role.toUpperCase()}</p>
+               <p className="text-sm text-slate-400 font-mono border-t border-white/10 pt-1 mt-1">Admin Dashboard</p>
             </div>
           </div>
-          <div className="text-sm font-bold bg-dark-bg text-accent-500 px-6 py-3 rounded-md border border-dark-border shadow-[0_0_10px_rgba(0,153,255,0.1)]">
-            {reports.length} Total Cases
+          <div className="flex gap-4">
+            <div className="text-sm font-bold bg-white/5 text-accent-500 px-6 py-3 rounded-xl border border-white/10 shadow-[0_0_10px_rgba(0,153,255,0.05)]">
+              {reports.length} Total Cases
+            </div>
+            <button onClick={handleLogout} className="text-sm font-bold bg-red-500/10 text-red-500 px-4 py-3 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors flex items-center gap-2">
+              <LogOut className="w-4 h-4" /> Sign Out
+            </button>
           </div>
         </div>
       </header>
@@ -182,14 +209,12 @@ export default function AdminPanel() {
                             >
                               <AlertTriangle className="w-4 h-4" /> Manage Case
                             </button>
-                            {profile.role === 'admin' && (
-                              <button 
-                                onClick={() => handleDelete(report.id)}
-                                className="px-4 py-2 bg-dark-bg border border-dark-border hover:border-primary-500 text-slate-500 hover:text-primary-400 rounded transition-colors text-sm font-bold flex items-center justify-center gap-2 shrink-0"
-                              >
-                                <Trash2 className="w-4 h-4" /> Delete
-                              </button>
-                            )}
+                            <button 
+                              onClick={() => handleDelete(report.id)}
+                              className="px-4 py-2 bg-dark-bg border border-dark-border hover:border-primary-500 text-slate-500 hover:text-primary-400 rounded transition-colors text-sm font-bold flex items-center justify-center gap-2 shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" /> Delete
+                            </button>
                             <div className="ml-auto text-xs font-mono text-slate-500 bg-dark-bg px-3 py-2 rounded border border-dark-border self-center w-full sm:w-auto text-center truncate">
                                Assigned: <span className="text-white">{report.assigned_to?.full_name || 'Unassigned'}</span>
                             </div>
