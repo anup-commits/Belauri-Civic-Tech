@@ -23,7 +23,7 @@ export default function AdminPanel() {
     try {
       setLoading(true);
       const [reportsData, volunteersData] = await Promise.all([
-        supabase.from('reports').select('*, assigned_to:profiles!assigned_to(full_name)').order('created_at', { ascending: false }),
+        supabase.from('reports').select('*, assigned_to:profiles!assigned_to(id, full_name)').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, full_name, email, role').in('role', ['admin', 'volunteer'])
       ]);
 
@@ -43,12 +43,9 @@ export default function AdminPanel() {
       const payload: any = {
         status: editFormData.status,
         resolution_note: editFormData.resolution_note || null,
+        assigned_to: editFormData.assigned_to || null,
         updated_at: new Date().toISOString()
       };
-      
-      if (editFormData.assigned_to) {
-         payload.assigned_to = editFormData.assigned_to;
-      }
 
       const { error } = await supabase.from('reports').update(payload).eq('id', id);
 

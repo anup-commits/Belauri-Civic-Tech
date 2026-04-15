@@ -152,3 +152,10 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.reports;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.likes;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+
+-- Allow admins to delete reports
+CREATE POLICY "Admins can delete reports." ON public.reports FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role IN ('admin')
+  )
+);
